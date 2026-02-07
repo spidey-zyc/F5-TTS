@@ -59,7 +59,7 @@ def main():
 if __name__ == "__main__":
     tokenizer = "char"  # "pinyin" | "char"
 
-    dataset_dir = "<SOME_PATH>/LJSpeech-1.1"
+    dataset_dir = "/hpc_stor03/public/shared/data/tts/LJSpeech-1.1"
     dataset_name = f"LJSpeech_{tokenizer}"
     meta_info = os.path.join(dataset_dir, "metadata.csv")
     save_dir = str(files("f5_tts").joinpath("../../")) + f"/data/{dataset_name}"

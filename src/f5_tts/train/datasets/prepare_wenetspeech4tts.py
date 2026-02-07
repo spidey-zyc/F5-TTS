@@ -50,6 +50,34 @@ def main():
     assert tokenizer in ["pinyin", "char"]
 
     audio_path_list, text_list, duration_list = [], [], []
+    # #region agent log
+    try:
+        import json as _json
+        from time import time as _time
+        _log_path = "/hpc_stor03/sjtu_home/yichi.zhang/my_projects/.cursor/debug.log"
+        with open(_log_path, "a", encoding="utf-8") as _f:
+            _f.write(
+                _json.dumps(
+                    {
+                        "sessionId": "debug-session",
+                        "runId": "pre-fix",
+                        "hypothesisId": "H1",
+                        "location": "prepare_wenetspeech4tts.py:main:entry",
+                        "message": "enter main",
+                        "data": {
+                            "cwd": os.getcwd(),
+                            "dataset_paths": dataset_paths,
+                            "save_dir": save_dir,
+                        },
+                        "timestamp": int(_time() * 1000),
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
+    except Exception:
+        pass
+    # #endregion agent log
 
     executor = ProcessPoolExecutor(max_workers=max_workers)
     futures = []
@@ -65,8 +93,32 @@ def main():
         duration_list.extend(durations)
     executor.shutdown()
 
-    if not os.path.exists("data"):
-        os.makedirs("data")
+    if not os.path.exists(save_dir):
+        # #region agent log
+        try:
+            import json as _json
+            from time import time as _time
+            _log_path = "/hpc_stor03/sjtu_home/yichi.zhang/my_projects/.cursor/debug.log"
+            with open(_log_path, "a", encoding="utf-8") as _f:
+                _f.write(
+                    _json.dumps(
+                        {
+                            "sessionId": "debug-session",
+                            "runId": "pre-fix",
+                            "hypothesisId": "H1",
+                            "location": "prepare_wenetspeech4tts.py:main:mkdir",
+                            "message": "attempting to create save_dir",
+                            "data": {"save_dir": save_dir, "cwd": os.getcwd()},
+                            "timestamp": int(_time() * 1000),
+                        },
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
+        except Exception:
+            pass
+        # #endregion agent log
+        os.makedirs(save_dir, exist_ok=True)
 
     print(f"\nSaving to {save_dir} ...")
     dataset = Dataset.from_dict({"audio_path": audio_path_list, "text": text_list, "duration": duration_list})
@@ -106,9 +158,9 @@ if __name__ == "__main__":
         + tokenizer
     )
     dataset_paths = [
-        "<SOME_PATH>/WenetSpeech4TTS/Basic",
-        "<SOME_PATH>/WenetSpeech4TTS/Standard",
-        "<SOME_PATH>/WenetSpeech4TTS/Premium",
+        "/hpc_stor03/public/shared/data/tts/WenetSpeech4TTS/Basic",
+        "/hpc_stor03/public/shared/data/tts/WenetSpeech4TTS/Standard",
+        "/hpc_stor03/public/shared/data/tts/WenetSpeech4TTS/Premium",
     ][-dataset_choice:]
     save_dir = str(files("f5_tts").joinpath("../../")) + f"/data/{dataset_name}"
     print(f"\nChoose Dataset: {dataset_name}, will save to {save_dir}\n")
